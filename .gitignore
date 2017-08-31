@@ -1,0 +1,5 @@
+bfcompile
+*.o
+*.asm
+tests/*
+!tests/*.bf

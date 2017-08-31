@@ -22,13 +22,13 @@ Typical usage example
 ---------------------
 	bfcompile hello.bf -w 4 -o helloworld.asm
 	nasm -f elf32 helloworld.asm
-	gcc -m 32 helloworld.o -o helloworld
+	gcc -m32 helloworld.o -o helloworld
 	./helloworld
 
 Other things included
 ---------------------
 * scripts/ directory contains some command-line scripts which can be useful
-  bfcompile.bat will compile and run your Brainfuck program. This scipt will probably not be updated.
+  bfcompile.bat and bfcompile.sh will compile and run your Brainfuck program
   change_names.sh is a temporary workaround to change Windows-style function names to Linux-style
 * tests/ contains some exemplary programs to test functionality of the compiler
 

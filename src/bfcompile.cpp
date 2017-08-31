@@ -13,7 +13,7 @@ using namespace std;
 //ebx - base address register
 //esi - address offset register
 //a* - value register
-//di - memory width
+//edi - memory width
 
 struct programConfig_t {
 	int memoryLength;
