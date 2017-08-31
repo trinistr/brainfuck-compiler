@@ -1,6 +1,5 @@
 Brainfuck compiler
 =================
-
 Ever wanted to compile your cool Brainfuck programs directly into x86 assembly?
 Maybe not, but now you can!
 
@@ -8,7 +7,6 @@ Assembly code is compatible with NASM. Depending on memory width, it may be x86 
 
 Features
 --------
-
 * Arbitrary memory cell count (may be subject to memory limits)
 * Selectable memory cell width - 1, 2, 4 or 8 bytes
 * Possibility to call program as a function
@@ -16,16 +14,21 @@ Features
 
 Compiling executable
 --------------------
-
 	cd src
 	make
-That's all fo now
+That's all for now, folks!
 
 Typical usage example
 ---------------------
-
 	bfcompile hello.bf -w 4 -o helloworld.asm
 	nasm -f elf32 helloworld.asm
 	gcc -m 32 helloworld.o -o helloworld
 	./helloworld
+
+Other things included
+---------------------
+* scripts/ directory contains some command-line scripts which can be useful
+  bfcompile.bat will compile and run your Brainfuck program. This scipt will probably not be updated.
+  change_names.sh is a temporary workaround to change Windows-style function names to Linux-style
+* tests/ contains some exemplary programs to test functionality of the compiler
 
