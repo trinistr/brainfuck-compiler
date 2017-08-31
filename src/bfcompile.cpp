@@ -80,11 +80,11 @@ int main(int argc, char* argv[]){
 				case 'm':
 					temp = strtol(optarg, NULL, 0);
 					if(temp<1) {
-						cerr<<"Error: Memory length can't be less than 1";
+						cerr<<"Error: Memory cell count can't be less than 1";
 						return 0;
 					}
 					if(temp<10) {
-						cerr<<"Warning: Memory length of "<<temp<<" is probably too low";
+						cerr<<"Warning: Memory cell count of "<<temp<<" is probably too low";
 					}
 					programConfig.memoryLength = temp;
 					break;
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]){
 							programConfig.registerName = "rax";
 							break;
 						default:
-							cerr<<"Error: Memory width must be one of the following: 1, 2, 4, 8";
+							cerr<<"Error: Memory cell width must be one of the following: 1, 2, 4, 8";
 							return 0;
 					}
 					programConfig.memoryWidth = temp;
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]){
 	if(programConfig.verbose) {
 		cout<<"Input file: "<<inFile<<"\nOutput file: "<<outFilename<<endl;
 		cout<<"Function name: \""<<programConfig.functionName<<'"'<<endl;
-		cout<<"Memory: "<<programConfig.memoryLength<<"(memory length) x "<<programConfig.memoryWidth<<"(memory width) = "
+		cout<<"Memory: "<<programConfig.memoryLength<<"(cell count) x "<<programConfig.memoryWidth<<"(cell width) = "
 			<<programConfig.memoryLength*programConfig.memoryWidth<<" bytes"<<endl;
 		cout<<"Program returns "<< (programConfig.zeroOnReturn?"zero":"current value") <<endl;
 		cout<<"Procedures syntax "<< (programConfig.useProcedures?"en":"dis") <<"abled"<<endl;
