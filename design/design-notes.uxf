@@ -4,18 +4,21 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>117</x>
-      <y>225</y>
-      <w>180</w>
-      <h>117</h>
+      <x>324</x>
+      <y>0</y>
+      <w>189</w>
+      <h>207</h>
     </coordinates>
     <panel_attributes>ProgramConfig
 --
 - memoryLength: int
-- memoryWidth: int
+- wordSize: RegWidth
+- architecture: Arch
+- memoryWrapping: Wrap
+- useStdlib: boolean
+- targetSystem: System
+- returnZero: boolean
 - functionName: string
-- zeroOnReturn: boolean
-- useProcedures: boolean
 - outputFile: string
 </panel_attributes>
     <additional_attributes/>
@@ -23,74 +26,17 @@
   <element>
     <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
     <coordinates>
-      <x>0</x>
-      <y>360</y>
-      <w>403</w>
-      <h>1248</h>
-    </coordinates>
-    <panel_attributes>title: Setup ProgramConfig
-Start
-If
-	[-o oooo used]
-	outputFile = oooo
-
-	[-o not used]
-	Derive filename
-EndIf
-If
-	[-m aaaa used]
-	memoryLength = aaaa
-		
-	[-m not used]
-	memoryLength = 30000
-EndIf
-If
-	[-w b used \&amp;&amp;\b = 1|2|4|8]
-	memoryWidth = b
-	
-	[-w not used \||\b != 1|2|4|8]
-	memoryWidth = 1
-EndIf
-If
-	[-n ssss used]
-	functionName = ssss
-	
-	[-n not used]
-	function name = main
-EndIf
-If
-	[-z used]
-	zeroOnReturn = true
-
-	[-z not used]
-	zeroOnReturn = false
-EndIf
-If
-	[-p used]
-	useProcedures = true
-
-	[-p not used]
-	useProcedures = false
-EndIf
-End
-
-</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
-    <coordinates>
-      <x>720</x>
+      <x>36</x>
       <y>0</y>
-      <w>255</w>
-      <h>328</h>
+      <w>210</w>
+      <h>341</h>
     </coordinates>
     <panel_attributes>title: BFCompile
 Start
 Setup ProgamConfig
-Define target-dependent strings
+Define target-dependent\strings and functions
 Write prologue
-Initalize variables
+Initalize variables?
 -- Parse --
 Write epilogue
 End
@@ -101,31 +47,8 @@ End
   <element>
     <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
     <coordinates>
-      <x>432</x>
-      <y>360</y>
-      <w>289</w>
-      <h>321</h>
-    </coordinates>
-    <panel_attributes>title: Define target-dependent strings
-Start
-If
-	[Windows]
-	stringPrefix = '_'
-
-	[else]
-	stringPrefix=''
-EndIf
-? Change strings
-End
-
-</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
-    <coordinates>
-      <x>738</x>
-      <y>360</y>
+      <x>36</x>
+      <y>351</y>
       <w>227</w>
       <h>307</h>
     </coordinates>
@@ -144,10 +67,10 @@ End
   <element>
     <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
     <coordinates>
-      <x>432</x>
-      <y>774</y>
-      <w>648</w>
-      <h>315</h>
+      <x>36</x>
+      <y>729</y>
+      <w>654</w>
+      <h>321</h>
     </coordinates>
     <panel_attributes>title: Setup memory in .bss
 Start
@@ -173,15 +96,15 @@ End
   <element>
     <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
     <coordinates>
-      <x>981</x>
-      <y>360</y>
-      <w>286</w>
+      <x>288</x>
+      <y>351</y>
+      <w>267</w>
       <h>360</h>
     </coordinates>
     <panel_attributes>title: Write epilogue
 Start
 If
-	[zeroOnReturn=true]
+	[returnZero=true]
 	*ax = 0
 
 	[else]
@@ -196,19 +119,100 @@ End
   <element>
     <id>UMLNote</id>
     <coordinates>
-      <x>1062</x>
-      <y>234</y>
+      <x>738</x>
+      <y>0</y>
       <w>171</w>
-      <h>99</h>
+      <h>81</h>
     </coordinates>
     <panel_attributes>Used registers
 --
 eax/rax (don't care)
 ebx/rbx
-esi/rsi
+esi/rsi  ABIs are different!
 edi/rdi
 
 bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>531</x>
+      <y>0</y>
+      <w>171</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>wordSize
+--
+4 &amp; 8 can be used only
+in 32 xor 64 bit mode
+respectively
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>531</x>
+      <y>99</y>
+      <w>81</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+RegWidth
+--
+bytes1 =1
+bytes2 =2
+bytes4 =4
+bytes8 =8
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>630</x>
+      <y>99</y>
+      <w>90</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+Wrap
+--
+wrap
+stop
+error</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>738</x>
+      <y>99</y>
+      <w>90</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+System
+--
+linux
+macos
+windows</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>846</x>
+      <y>99</y>
+      <w>90</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+Arch
+--
+x86
+x86_64</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>
