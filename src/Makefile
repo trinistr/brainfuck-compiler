@@ -14,25 +14,28 @@ LIBS =
 LFLAGS = -o $(LEXERC)
 YFLAGS = -o $(PARSERC)
 
-# Files
+# Source files
 SRCS = $(LEXERC) $(PARSERC)
 LSRCS = bf.l
 YSRCS = bf.y
-OBJS = $(SRCS:.c=.o)
-
+# Generated files
 LEXERC = lex.bf.c
 PARSERC = bf.tab.c
+OBJS = $(SRCS:.c=.o)
 
 all: $(MAIN)
+
+stripped: $(MAIN)
+	strip $(MAIN)
 
 $(MAIN): $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDEPATHS) -o $(MAIN) $(OBJS) $(LIBPATHS) $(LIBS)
 	
-$(LEXERC):
+$(LEXERC): $(LSCRS) $(PARSERC:.c=.h)
 	$(LEX) $(LFLAGS) $(LSRCS)
 	
-$(PARSERC):
-	$(YACC) $(YFAGS) $(YSRCS)
+$(PARSERC) $(PARSERC:.c=.h): $(YSRCS)
+	$(YACC) -d $(YFLAGS) $(YSRCS)
 	
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
@@ -40,4 +43,4 @@ $(PARSERC):
 .PHONY: clean
 
 clean:
-	$(RM) $(MAIN) *.o $(LEXERC) $(PARSERC) *~
+	$(RM) $(MAIN) *.o $(PARSERC:.c=.h) $(LEXERC) $(PARSERC) *~
