@@ -3,3 +3,6 @@ bfcompile
 *.asm
 tests/*
 !tests/*.bf
+*.tab.*
+*.output
+lex.*
