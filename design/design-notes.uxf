@@ -4,30 +4,36 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>324</x>
+      <x>270</x>
       <y>0</y>
-      <w>189</w>
-      <h>207</h>
+      <w>243</w>
+      <h>261</h>
     </coordinates>
     <panel_attributes>ProgramConfig
 --
-- memoryLength: int
-- wordSize: RegWidth
-- architecture: Arch
-- memoryWrapping: Wrap
-- useStdlib: boolean
+- memoryLength: int (30000)
+- wordSize: RegWidth (bytes1)
+- dialect: Capabilities
+- memoryWrapping: Wrap (wrap)
+- optimization: OLevel
+- architecture: Arch (x86)
+- useStdlib: boolean (true)
 - targetSystem: System
+(linux (current))
 - returnZero: boolean
-- functionName: string
+(depends on functionName)
+- functionName: string (main)
 - outputFile: string
-</panel_attributes>
+(inputFile:.bf=.asm)
+- format: Format (default)
+- verbosity: int</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
     <coordinates>
-      <x>36</x>
-      <y>0</y>
+      <x>18</x>
+      <y>630</y>
       <w>210</w>
       <h>341</h>
     </coordinates>
@@ -47,8 +53,8 @@ End
   <element>
     <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
     <coordinates>
-      <x>36</x>
-      <y>351</y>
+      <x>243</x>
+      <y>630</y>
       <w>227</w>
       <h>307</h>
     </coordinates>
@@ -67,24 +73,21 @@ End
   <element>
     <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
     <coordinates>
-      <x>36</x>
-      <y>729</y>
-      <w>654</w>
+      <x>243</x>
+      <y>954</y>
+      <w>272</w>
       <h>321</h>
     </coordinates>
     <panel_attributes>title: Setup memory in .bss
 Start
+[wordSize]
 If
-	[memoryWidth=1]
 	resb
-	
-	[memoryWidth=2]
+
 	resw
 	
-	[memoryWidth=4]
 	resd
 	
-	[memoryWidth=8]
 	resq
 EndIf
 memoryLength
@@ -96,10 +99,10 @@ End
   <element>
     <type>com.baselet.element.old.allinone.ActivityDiagramText</type>
     <coordinates>
-      <x>288</x>
-      <y>351</y>
-      <w>267</w>
-      <h>360</h>
+      <x>531</x>
+      <y>630</y>
+      <w>273</w>
+      <h>509</h>
     </coordinates>
     <panel_attributes>title: Write epilogue
 Start
@@ -110,7 +113,13 @@ If
 	[else]
 EndIf
 Pop registers
-Leave
+If
+	[useStdlib]
+	ret
+
+	[else]
+	syscall
+EndIf
 End
 
 </panel_attributes>
@@ -173,7 +182,7 @@ bytes8 =8
     <coordinates>
       <x>630</x>
       <y>99</y>
-      <w>90</w>
+      <w>81</w>
       <h>99</h>
     </coordinates>
     <panel_attributes>&lt;&lt;enum&gt;&gt;
@@ -187,15 +196,16 @@ error</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>738</x>
+      <x>729</x>
       <y>99</y>
-      <w>90</w>
+      <w>81</w>
       <h>99</h>
     </coordinates>
     <panel_attributes>&lt;&lt;enum&gt;&gt;
 System
 --
 linux
+bsd
 macos
 windows</panel_attributes>
     <additional_attributes/>
@@ -203,9 +213,9 @@ windows</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>846</x>
-      <y>99</y>
-      <w>90</w>
+      <x>630</x>
+      <y>207</y>
+      <w>81</w>
       <h>99</h>
     </coordinates>
     <panel_attributes>&lt;&lt;enum&gt;&gt;
@@ -213,6 +223,124 @@ Arch
 --
 x86
 x86_64</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>531</x>
+      <y>207</y>
+      <w>81</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+Format
+--
+default
+PIC</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>828</x>
+      <y>99</y>
+      <w>81</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+Capabilities
+--
+pure     =0
+files      =1
+procs    =2
+lib         =4</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>18</x>
+      <y>0</y>
+      <w>234</w>
+      <h>342</h>
+    </coordinates>
+    <panel_attributes>Command-line options
+--
+-m --memory "memoryLength"
+-w --word {wordSize}
+-d --dialect |dialect|
+-w --wrapping {memoryWrapping}
+-O --optimization {optimization}
+-a --arch {architecture}
+--[no-]stdlib (useStdlib)
+-t --target {targetSystem}
+-z --[no-]return-zero (returnZero)
+-n --name: "functionName"
+-o --output "outputFile"
+-f --format {format}
+-v --verbose (verbosity)
+-V --version
+-h -? --help
+
+--
+Key:
+"val"   - user-supplied
+{val}  - choice
+|val|    - list
+(val)    - boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>729</x>
+      <y>207</y>
+      <w>81</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enum&gt;&gt;
+OLevel
+--
+optim0  =0
+optim1  =1
+optim2  =2</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>531</x>
+      <y>324</y>
+      <w>252</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>Working with files
+--
+';' and ':' are analogous to ',' and '.'
+'^' selects file descriptor with value
+    from the current memory cell
+%string% is used to open file, returns
+    descriptor number to current cell
+Files are opened in read-write mode
+    and are created if needed
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>810</x>
+      <y>324</y>
+      <w>117</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>TODO
+--
+Describe:
+- Capabilities
+- OLEvel
+bg=yellow</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>
