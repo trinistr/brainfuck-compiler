@@ -2,6 +2,7 @@
 #include "bf.tab.h"
 %}
 %option noyywrap
+%x FILESTRING
 
 %%
 
@@ -11,4 +12,8 @@
 -+					{ yylval.length=yyleng; return MINUS; }
 >+					{ yylval.length=yyleng; return RIGHT; }
 \<+					{ yylval.length=yyleng; return LEFT; }
-[[\].,]				{ return yytext[0]; }
+[[\].,:;^]			{ return yytext[0]; }
+	/* Filenames containing '%' will not be supported for now */
+%					{ BEGIN(FILESTRING); }
+<FILESTRING>[^%]+	{ yylval.string=strdup(yytext); return FILENAME; }
+<FILESTRING>%		{ BEGIN(INITIAL); }

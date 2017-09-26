@@ -18,6 +18,7 @@ void yyerror(const char* s);
 %token <length> RIGHT
 %token <length> LEFT
 %token <length> NEWLINES
+%token <string> FILENAME
 
 %error-verbose
 %%
@@ -38,13 +39,17 @@ operations:
 	|	operation
 	;
 operation:
-		PLUS	{ printf("%d +\n", yylval.length); }
-	|	MINUS	{ printf("%d -\n", yylval.length); }
-	|	LEFT	{ printf("%d <\n", yylval.length); }
-	|	RIGHT	{ printf("%d >\n", yylval.length); }
-	|	'.'		{ puts("."); }
-	|	','		{ puts(","); }
+		PLUS		{ printf("%d +\n", yylval.length); }
+	|	MINUS		{ printf("%d -\n", yylval.length); }
+	|	LEFT		{ printf("%d <\n", yylval.length); }
+	|	RIGHT		{ printf("%d >\n", yylval.length); }
+	|	'.'			{ puts("."); }
+	|	':'			{ puts(":"); }
+	|	','			{ puts(","); }
+	|	';'			{ puts(";"); }
+	|	'^'			{ puts("^"); }
 	|	NEWLINES	{ printf("%d newline(s)\n", yylval.length); }
+	|	FILENAME	{ printf("open file: %s\n", yylval.string); free(yylval.string); }
 	;
 
 %%
