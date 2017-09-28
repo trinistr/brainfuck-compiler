@@ -26,7 +26,7 @@ struct programConfig_t {
 	ofstream outFile;
 	bool verbose;
 } programConfig;
-static const char *options = "m:w:o:n:zpvh?";
+static const char *options = "m:w:o:n:zvh?";
 string outFilename;
 
 void writePreamble(ofstream& outFile);
@@ -101,11 +101,8 @@ int main(int argc, char* argv[]){
 						case 4:
 							programConfig.registerName = "eax";
 							break;
-						case 8:
-							programConfig.registerName = "rax";
-							break;
 						default:
-							cerr<<"Error: Memory cell width must be one of the following: 1, 2, 4, 8";
+							cerr<<"Error: Memory cell width must be one of the following: 1, 2, 4";
 							return 0;
 					}
 					programConfig.memoryWidth = temp;
@@ -175,20 +172,8 @@ int main(int argc, char* argv[]){
 		decrementString = "dec esi\n";
 	}
 	else {
-		incrementString = "add ";
-		switch(programConfig.memoryWidth)
-		{
-			case 2:
-			case 4:
-				incrementString+= "esi, edi";
-				break;
-			case 8:
-				incrementString+= "rsi, rdi";
-				break;
-		}			
-		incrementString+= '\n';
-		decrementString = incrementString;
-		decrementString.replace(0, 3, "sub");
+		incrementString = "add esi, edi\n"
+		decrementString = "sub esi, edi\n";
 	}
 	
 	programConfig.inFile.get(op);
@@ -200,12 +185,7 @@ int main(int argc, char* argv[]){
 				programConfig.outFile<<"mov [ebx+esi], "<<programConfig.registerName<<'\n';
 				if(++memoryIndex > memoryIndexMax){
 					memoryIndex = 0;
-					if(programConfig.memoryWidth<=4) {
-						programConfig.outFile<<"xor esi, esi\n";
-					}
-					else {
-						programConfig.outFile<<"xor rsi, rsi\n";
-					}
+					programConfig.outFile<<"xor esi, esi\n";
 				}
 				else {
 					programConfig.outFile<<incrementString;
@@ -217,12 +197,7 @@ int main(int argc, char* argv[]){
 				programConfig.outFile<<"mov [ebx+esi], "<<programConfig.registerName<<'\n';
 				if(--memoryIndex < 0){
 					memoryIndex = memoryIndexMax;
-					if(programConfig.memoryWidth<=4) {
-						programConfig.outFile<<"mov esi, "<<memoryIndexMax<<'\n';
-					}
-					else {
-						programConfig.outFile<<"mov rsi, "<<memoryIndexMax<<'\n';
-					}
+					programConfig.outFile<<"mov esi, "<<memoryIndexMax<<'\n';
 				}
 				else {
 					programConfig.outFile<<decrementString;
@@ -240,7 +215,7 @@ int main(int argc, char* argv[]){
 			case '.':
 				programConfig.outFile<<"mov [esp], "<<programConfig.registerName<<'\n';
 				programConfig.outFile<<"call _putchar\n";
-				programConfig.outFile<<"mov "<<programConfig.registerName<<", [esp]\n"; //TODO: proper hanadling of 64
+				programConfig.outFile<<"mov "<<programConfig.registerName<<", [esp]\n";
 				break;
 			case ',':
 				programConfig.outFile<<"call _getchar\n";
@@ -303,39 +278,22 @@ void writePreamble(ofstream& out)
 		case 4:
 			out<<'d';
 			break;
-		case 8:
-			out<<'q';
-			break;
 	}
 	out<<' '<<programConfig.memoryLength<<'\n';
 	out<<endl;
 	out<<"section .text\n";
 	out<<'_'<<programConfig.functionName<<":\n";
-	if(programConfig.memoryWidth<=4) {
-		out<<"push ebp\n";
-		out<<"mov ebp, esp\n";
-		out<<"push ebx\n";
-		out<<"push esi\n";
-		out<<"push edi\n";
-		out<<"sub esp, 4\n";
-		out<<"mov ebx, memory\n";
-		out<<"xor esi, esi\n";
-		out<<"xor eax, eax\n";
-		if(programConfig.memoryWidth>1)
-			out<<"mov edi, "<<programConfig.memoryWidth<<'\n';
-	}
-	else {
-		out<<"push rbp\n";
-		out<<"mov rbp, rsp\n";
-		out<<"push rbx\n";
-		out<<"push rsi\n";
-		out<<"push rdi\n";
-		out<<"sub rsp, 8\n";
-		out<<"mov rbx, memory\n";
-		out<<"xor rsi, rsi\n";
-		out<<"xor rax, rax\n";
-		out<<"mov rdi, "<<programConfig.memoryWidth<<'\n';
-	}
+	out<<"push ebp\n";
+	out<<"mov ebp, esp\n";
+	out<<"push ebx\n";
+	out<<"push esi\n";
+	out<<"push edi\n";
+	out<<"sub esp, 4\n";
+	out<<"mov ebx, memory\n";
+	out<<"xor esi, esi\n";
+	out<<"xor eax, eax\n";
+	if(programConfig.memoryWidth>1)
+		out<<"mov edi, "<<programConfig.memoryWidth<<'\n';
 	out<<endl;
 }
 
@@ -345,20 +303,11 @@ void writePostamble(ofstream& out)
 	if(programConfig.zeroOnReturn) {
 		out<<"xor "<<programConfig.registerName<<", "<<programConfig.registerName<<'\n';
 	}
-	if(programConfig.memoryWidth<=4) {
-		out<<"add esp,4\n";
-		out<<"pop edi\n";
-		out<<"pop esi\n";
-		out<<"pop ebx\n";
-		out<<"pop ebp\n";
-	}
-	else {
-		out<<"add rsp,8\n";
-		out<<"pop rdi\n";
-		out<<"pop rsi\n";
-		out<<"pop rbx\n";
-		out<<"pop rbp\n";
-	}
+	out<<"add esp,4\n";
+	out<<"pop edi\n";
+	out<<"pop esi\n";
+	out<<"pop ebx\n";
+	out<<"pop ebp\n";
 	out<<"ret\n";
 }
 
@@ -367,13 +316,12 @@ void printHelp()
 	cout<<"Usage: bfcompile source [options]"<<endl;
 	cout<<"Options:"<<endl;
 	cout<<"  -m <length>\t\tSet memory length in cells. Default: 30000\n";
-	cout<<"  -w <width>\t\tSet memory cell width in bytes. Allowed values: 1, 2, 4, 8. Default: 1\n";
-	cout<<"\t\t\tValue of 8 generates 64-bit code. Untested.\n";
+	cout<<"  -w <width>\t\tSet memory cell width in bytes. Allowed values: 1, 2, 4. Default: 1\n";
 	cout<<"  -n <name>\t\tSet main function name. Default: \"main\"\n";
 	cout<<"  -o <filename>\t\tSet output file. If not specified, filename will be derived from source\n";
 	cout<<"  -z\t\t\tAlways return zero. Otherwise, return current value\n";
-	//cout<<"  -p\t\t\tAllow brainfuck procedures syntax\n";
 	cout<<"  -v\t\t\tEnable verbose mode\n";
+	cout<<"  -h\t\t\tShow this help message\n";
 }
 
 string deriveFilename(string source)
