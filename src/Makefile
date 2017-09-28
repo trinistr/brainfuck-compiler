@@ -1,5 +1,5 @@
 # Name definitions
-MAIN = bfcompile
+MAIN = ../bfcompile
 
 # Compilers and stuff
 CC = gcc
@@ -11,36 +11,25 @@ CFLAGS = -Wall -ggdb3
 INCLUDEPATHS =
 LIBPATHS =
 LIBS =
-LFLAGS = -o $(LEXERC)
-YFLAGS = -o $(PARSERC)
 
 # Source files
-SRCS = $(LEXERC) $(PARSERC)
-LSRCS = bf.l
-YSRCS = bf.y
-# Generated files
-LEXERC = lex.bf.c
-PARSERC = bf.tab.c
-OBJS = $(SRCS:.c=.o)
+SRCS =
 
 all: $(MAIN)
 
 stripped: $(MAIN)
 	strip $(MAIN)
 
-$(MAIN): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDEPATHS) -o $(MAIN) $(OBJS) $(LIBPATHS) $(LIBS)
+$(MAIN): lex.bf.o bf.tab.o $(SRCS:.c=.o)
+	$(CC) $(CFLAGS) $(INCLUDEPATHS) $^ $(LIBPATHS) $(LIBS) -o $(MAIN)
 	
-$(LEXERC): $(LSCRS) $(PARSERC:.c=.h)
-	$(LEX) $(LFLAGS) $(LSRCS)
+lex.%.c: %.l %.tab.h
+	$(LEX) -o $@ $<
 	
-$(PARSERC) $(PARSERC:.c=.h): $(YSRCS)
-	$(YACC) -d $(YFLAGS) $(YSRCS)
-	
-.c.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+%.tab.c %.tab.h: %.y
+	$(YACC) -d $<
 	
 .PHONY: clean
 
 clean:
-	$(RM) $(MAIN) *.o $(PARSERC:.c=.h) $(LEXERC) $(PARSERC) *~
+	$(RM) $(MAIN) *.o *~ lex.* *.tab.*
