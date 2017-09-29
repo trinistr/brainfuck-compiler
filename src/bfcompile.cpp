@@ -38,7 +38,7 @@ string deriveFilename(string source);
 
 int main(int argc, char* argv[]){
 	string inFile;
-	
+
 	programConfig.memoryLength = 30000;
 	programConfig.memoryWidth = 1;
 	programConfig.useProcedures = false;
@@ -55,19 +55,19 @@ int main(int argc, char* argv[]){
 		cout<<"Source file: ";
 		getline(cin, inFile);
 		if((stat(inFile.c_str(),&statBuffer))!=0){
-			cerr<<"Error: File doesn't exist";
+			cerr<<"Error: file doesn't exist\n";
 			return 0;
 		}
-		
+
 		cout<<"Output file: ";
 		getline(cin, outFilename);
 		if((stat(outFilename.c_str(),&statBuffer))==0){
-			cerr<<"Warning: File exists. Continue? (y/n): ";
+			cerr<<"Warning: file exists. Continue? (y/n): ";
 			cin>>confirm;
 			if(confirm!='y'){
 				return 0;
 			}
-		}	
+		}
 	}
 	else {
 		int opt = getopt(argc, argv, options);
@@ -84,11 +84,11 @@ int main(int argc, char* argv[]){
 				case 'm':
 					temp = strtol(optarg, NULL, 0);
 					if(temp<1) {
-						cerr<<"Error: Memory cell count can't be less than 1";
+						cerr<<"Error: memory cell count can't be less than 1\n";
 						return 0;
 					}
 					if(temp<10) {
-						cerr<<"Warning: Memory cell count of "<<temp<<" is probably too low";
+						cerr<<"Warning: memory cell count of "<<temp<<" may be too low\n";
 					}
 					programConfig.memoryLength = temp;
 					break;
@@ -106,7 +106,7 @@ int main(int argc, char* argv[]){
 							programConfig.registerName = "eax";
 							break;
 						default:
-							cerr<<"Error: Memory cell width must be one of the following: 1, 2, 4";
+							cerr<<"Error: memory cell width must be one of the following: 1, 2, 4\n";
 							return 0;
 					}
 					programConfig.memoryWidth = temp;
@@ -124,7 +124,7 @@ int main(int argc, char* argv[]){
 					}
 					else if(strcmp(optarg, "linux")!=0) {
 						// if not 'linux', it's an error
-						cerr<<"Error: target must be one of the following: linux, windows";
+						cerr<<"Error: target must be one of the following: linux, windows\n";
 					}
 				case 'v':
 					programConfig.verbose = true;
@@ -140,41 +140,40 @@ int main(int argc, char* argv[]){
 			opt = getopt(argc, argv, options);
 		}
 	}
-	
+
 	if(argc==optind) {
-		cerr<<"Error: No input file specified";
+		cerr<<"Error: no input file specified\n";
 		return 0;
 	}
-	
+
 	inFile = argv[optind];
 	if(outFilename.empty()) {
 		outFilename = deriveFilename(inFile);
 	}
-	
+
 	if(programConfig.verbose) {
 		cout<<"Input file: "<<inFile<<"\nOutput file: "<<outFilename<<endl;
 		cout<<"Function name: \""<<programConfig.functionName<<'"'<<endl;
 		cout<<"Memory: "<<programConfig.memoryLength<<"(cell count) x "<<programConfig.memoryWidth<<"(cell width) = "
 			<<programConfig.memoryLength*programConfig.memoryWidth<<" bytes"<<endl;
-		cout<<"Target: "<<programConfig.target<<endl;
+		cout<<"Target system: "<<programConfig.target<<endl;
 		cout<<"Program returns "<< (programConfig.zeroOnReturn?"zero":"current value") <<endl;
-		cout<<"Procedures syntax "<< (programConfig.useProcedures?"en":"dis") <<"abled"<<endl;
 	}
-	
+
 	programConfig.inFile.open(inFile.c_str());
 	if(!programConfig.inFile.good()) {
-		cerr<<"Error: Can't open file \""<<inFile<<"\" for reading\n";
+		cerr<<"Error: can't open file \""<<inFile<<"\" for reading\n";
 		return 0;
 	}
 	programConfig.outFile.open(outFilename.c_str(), ios_base::out|ios_base::trunc);
 	if(!programConfig.outFile.good()){
-		cerr<<"Error: Can't open file \""<<inFile<<"\" for writing\n";
+		cerr<<"Error: can't open file \""<<inFile<<"\" for writing\n";
 		programConfig.inFile.close();
 		return 0;
 	}
-	
+
 	writePreamble(programConfig.outFile);
-	
+
 	char op;
 	int line=1, column=0;
 	int loopIndex = 1;
@@ -186,14 +185,14 @@ int main(int argc, char* argv[]){
 		decrementString = "dec esi\n";
 	}
 	else {
-		incrementString = "add esi, edi\n"
+		incrementString = "add esi, edi\n";
 		decrementString = "sub esi, edi\n";
 	}
-	
+
 	programConfig.inFile.get(op);
 	while(!programConfig.inFile.eof()){
 		column++;
-		switch(op) 
+		switch(op)
 		{
 			case '>':
 				programConfig.outFile<<"mov [ebx+esi], "<<programConfig.registerName<<'\n';
@@ -206,7 +205,7 @@ int main(int argc, char* argv[]){
 				}
 				programConfig.outFile<<"mov "<<programConfig.registerName<<", [ebx+esi]\n";
 				break;
-				
+
 			case '<':
 				programConfig.outFile<<"mov [ebx+esi], "<<programConfig.registerName<<'\n';
 				if(--memoryIndex < 0){
@@ -218,14 +217,14 @@ int main(int argc, char* argv[]){
 				}
 				programConfig.outFile<<"mov "<<programConfig.registerName<<", [ebx+esi]\n";
 				break;
-				
+
 			case '+':
 				programConfig.outFile<<"inc "<<programConfig.registerName<<'\n';
 				break;
 			case '-':
 				programConfig.outFile<<"dec "<<programConfig.registerName<<'\n';
 				break;
-				
+
 			case '.':
 				programConfig.outFile<<"mov [esp], "<<programConfig.registerName<<'\n';
 				programConfig.outFile<<"call "<<programConfig.functionPrefix<<"putchar\n";
@@ -234,7 +233,7 @@ int main(int argc, char* argv[]){
 			case ',':
 				programConfig.outFile<<"call "<<programConfig.functionPrefix<<"getchar\n";
 				break;
-				
+
 			case '[':
 				loopStack.push(loopIndex);
 				programConfig.outFile<<"jmp LoopCondition"<<loopIndex<<'\n'<<"LoopBody"<<loopIndex<<":\n";
@@ -242,13 +241,13 @@ int main(int argc, char* argv[]){
 				break;
 			case ']':
 				if(loopStack.empty()) {
-					cerr<<"Error: Extra ']' at line "<<line<<", column "<<column<<endl;
+					cerr<<"Error: extra ']' at line "<<line<<", column "<<column<<endl;
 					return 0;
 				}
 				programConfig.outFile<<"LoopCondition"<<loopStack.top()<<":\n"<<"test "<<programConfig.registerName<<','<<programConfig.registerName<<"\njnz LoopBody"<<loopStack.top()<<'\n';
 				loopStack.pop();
 				break;
-				
+
 			case '\n':
 				line++;
 				column = 0;
@@ -257,16 +256,16 @@ int main(int argc, char* argv[]){
 			case ' ':
 				break;
 			default:
-				cout<<"Error: Invalid character at line "<<line<<", column "<<column<<endl;
+				cout<<"Error: invalid character at line "<<line<<", column "<<column<<endl;
 				return 0;
 		}
 		programConfig.inFile.get(op);
 	}
 	if(!loopStack.empty()) {
-		cout<<"Error: Extra '[', "<<loopStack.size()<<" loop(s) not closed";
+		cerr<<"Error: extra '[', "<<loopStack.size()<<" loop(s) not closed\n";
 		return 0;
 	}
-	
+
 	writePostamble(programConfig.outFile);
 
 	return 0;
