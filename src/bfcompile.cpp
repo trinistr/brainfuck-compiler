@@ -18,7 +18,6 @@ using namespace std;
 struct programConfig_t {
 	int memoryLength;
 	int memoryWidth;
-	bool useProcedures;
 	bool zeroOnReturn;
 	string functionName;
 	string functionPrefix;
@@ -41,7 +40,6 @@ int main(int argc, char* argv[]){
 
 	programConfig.memoryLength = 30000;
 	programConfig.memoryWidth = 1;
-	programConfig.useProcedures = false;
 	programConfig.zeroOnReturn = false;
 	programConfig.functionName = "main";
 	programConfig.registerName = "al";
@@ -82,9 +80,6 @@ int main(int argc, char* argv[]){
 			{
 				case 'z':
 					programConfig.zeroOnReturn = true;
-					break;
-				case 'p':
-					programConfig.useProcedures = true;
 					break;
 				case 'm':
 					temp = strtol(optarg, NULL, 0);
@@ -139,11 +134,10 @@ int main(int argc, char* argv[]){
 					break;
 				case '?':
 				case 'h':
+				default:
 					printHelp();
 					return 0;
 					break;
-				default:
-					;
 			}
 			opt = getopt(argc, argv, options);
 		}
@@ -320,7 +314,6 @@ void writePreamble(ofstream& out)
 
 void writePostamble(ofstream& out)
 {
-	out<<endl;
 	if(programConfig.zeroOnReturn) {
 		out<<"xor "<<programConfig.registerName<<", "<<programConfig.registerName<<'\n';
 	}
@@ -334,7 +327,7 @@ void writePostamble(ofstream& out)
 
 void printHelp()
 {
-	cout<<"Usage: bfcompile source [options]"<<endl;
+	cout<<"Usage: bfcompile [options] source"<<endl;
 	cout<<"Options:"<<endl;
 	cout<<"  -m <length>\t\tSet memory length in cells. Default: 30000\n";
 	cout<<"  -w <width>\t\tSet memory cell width in bytes. Allowed values: 1, 2, 4. Default: 1\n";
