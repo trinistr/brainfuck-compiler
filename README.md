@@ -29,6 +29,5 @@ Other things included
 ---------------------
 * scripts/ directory contains some command-line scripts which can be useful
   bfcompile.bat and bfcompile.sh will compile and run your Brainfuck program
-  change_names.sh is a temporary workaround to change Windows-style function names to Linux-style
 * tests/ contains some exemplary programs to test functionality of the compiler
 
