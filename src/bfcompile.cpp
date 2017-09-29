@@ -21,12 +21,14 @@ struct programConfig_t {
 	bool useProcedures;
 	bool zeroOnReturn;
 	string functionName;
+	string functionPrefix;
 	string registerName;
+	string target;
 	ifstream inFile;
 	ofstream outFile;
 	bool verbose;
 } programConfig;
-static const char *options = "m:w:o:n:zvh?";
+static const char *options = "m:w:o:n:t:zvh?";
 string outFilename;
 
 void writePreamble(ofstream& outFile);
@@ -44,7 +46,9 @@ int main(int argc, char* argv[]){
 	programConfig.functionName = "main";
 	programConfig.registerName = "al";
 	programConfig.verbose = false;
-	
+	programConfig.target = "linux";
+	programConfig.functionPrefix = "";
+
 	if(argc==1) {
 		char confirm;
 		struct stat statBuffer;
@@ -113,6 +117,15 @@ int main(int argc, char* argv[]){
 				case 'o':
 					outFilename = optarg;
 					break;
+				case 't':
+					if(strcmp(optarg, "windows")==0) {
+						programConfig.functionPrefix = "_";
+						programConfig.target = optarg;
+					}
+					else if(strcmp(optarg, "linux")!=0) {
+						// if not 'linux', it's an error
+						cerr<<"Error: target must be one of the following: linux, windows";
+					}
 				case 'v':
 					programConfig.verbose = true;
 					break;
@@ -143,6 +156,7 @@ int main(int argc, char* argv[]){
 		cout<<"Function name: \""<<programConfig.functionName<<'"'<<endl;
 		cout<<"Memory: "<<programConfig.memoryLength<<"(cell count) x "<<programConfig.memoryWidth<<"(cell width) = "
 			<<programConfig.memoryLength*programConfig.memoryWidth<<" bytes"<<endl;
+		cout<<"Target: "<<programConfig.target<<endl;
 		cout<<"Program returns "<< (programConfig.zeroOnReturn?"zero":"current value") <<endl;
 		cout<<"Procedures syntax "<< (programConfig.useProcedures?"en":"dis") <<"abled"<<endl;
 	}
@@ -214,11 +228,11 @@ int main(int argc, char* argv[]){
 				
 			case '.':
 				programConfig.outFile<<"mov [esp], "<<programConfig.registerName<<'\n';
-				programConfig.outFile<<"call _putchar\n";
+				programConfig.outFile<<"call "<<programConfig.functionPrefix<<"putchar\n";
 				programConfig.outFile<<"mov "<<programConfig.registerName<<", [esp]\n";
 				break;
 			case ',':
-				programConfig.outFile<<"call _getchar\n";
+				programConfig.outFile<<"call "<<programConfig.functionPrefix<<"getchar\n";
 				break;
 				
 			case '[':
@@ -260,9 +274,9 @@ int main(int argc, char* argv[]){
 
 void writePreamble(ofstream& out)
 {
-	out<<"global "<<'_'<<programConfig.functionName<<'\n';
-	out<<"extern "<<'_'<<"putchar\n";
-	out<<"extern "<<'_'<<"getchar\n";
+	out<<"global "<<programConfig.functionPrefix<<programConfig.functionName<<'\n';
+	out<<"extern "<<programConfig.functionPrefix<<"putchar\n";
+	out<<"extern "<<programConfig.functionPrefix<<"getchar\n";
 	out<<endl;
 	out<<"section .bss\n";
 	out<<"memory:\n";
@@ -282,7 +296,7 @@ void writePreamble(ofstream& out)
 	out<<' '<<programConfig.memoryLength<<'\n';
 	out<<endl;
 	out<<"section .text\n";
-	out<<'_'<<programConfig.functionName<<":\n";
+	out<<programConfig.functionPrefix<<programConfig.functionName<<":\n";
 	out<<"push ebp\n";
 	out<<"mov ebp, esp\n";
 	out<<"push ebx\n";
@@ -317,6 +331,7 @@ void printHelp()
 	cout<<"Options:"<<endl;
 	cout<<"  -m <length>\t\tSet memory length in cells. Default: 30000\n";
 	cout<<"  -w <width>\t\tSet memory cell width in bytes. Allowed values: 1, 2, 4. Default: 1\n";
+	cout<<"  -t <system>\t\tSet target system. Allowed values: windows, linux. Default: linux\n";
 	cout<<"  -n <name>\t\tSet main function name. Default: \"main\"\n";
 	cout<<"  -o <filename>\t\tSet output file. If not specified, filename will be derived from source\n";
 	cout<<"  -z\t\t\tAlways return zero. Otherwise, return current value\n";
