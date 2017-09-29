@@ -46,8 +46,13 @@ int main(int argc, char* argv[]){
 	programConfig.functionName = "main";
 	programConfig.registerName = "al";
 	programConfig.verbose = false;
+#if defined(__WIN32) || defined(__WIN32__)
+	programConfig.target = "windows";
+	programConfig.functionPrefix = "_";
+#else
 	programConfig.target = "linux";
 	programConfig.functionPrefix = "";
+#endif
 
 	if(argc==1) {
 		char confirm;
@@ -118,14 +123,17 @@ int main(int argc, char* argv[]){
 					outFilename = optarg;
 					break;
 				case 't':
-					if(strcmp(optarg, "windows")==0) {
+					if(strcmp(optarg, "linux")==0) {
+						programConfig.functionPrefix = "";
+					}
+					else if(strcmp(optarg, "windows")==0) {
 						programConfig.functionPrefix = "_";
-						programConfig.target = optarg;
 					}
-					else if(strcmp(optarg, "linux")!=0) {
-						// if not 'linux', it's an error
-						cerr<<"Error: target must be one of the following: linux, windows\n";
+					else {
+						cerr<<"Error: target must be one of the following: linux, windows\n";	
+						return 0;					
 					}
+					programConfig.target = optarg;
 				case 'v':
 					programConfig.verbose = true;
 					break;
