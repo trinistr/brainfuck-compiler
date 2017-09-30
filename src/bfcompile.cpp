@@ -28,7 +28,6 @@ struct programConfig_t {
 	bool verbose;
 } programConfig;
 static const char *options = "m:w:o:n:t:zvh?";
-string outFilename;
 
 void writePreamble(ofstream& outFile);
 void writePostamble(ofstream& outFile);
@@ -37,6 +36,7 @@ string deriveFilename(string source);
 
 int main(int argc, char* argv[]){
 	string inFile;
+	string outFilename;
 
 	programConfig.memoryLength = 30000;
 	programConfig.memoryWidth = 1;
@@ -141,14 +141,13 @@ int main(int argc, char* argv[]){
 			}
 			opt = getopt(argc, argv, options);
 		}
+		if(argc==optind) {
+			cerr<<"Error: no input file specified\n";
+			return 0;
+		}
+		inFile = argv[optind];
 	}
 
-	if(argc==optind) {
-		cerr<<"Error: no input file specified\n";
-		return 0;
-	}
-
-	inFile = argv[optind];
 	if(outFilename.empty()) {
 		outFilename = deriveFilename(inFile);
 	}
